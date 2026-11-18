@@ -1056,7 +1056,7 @@ function care(k,id){
   else if(k==='work'){ miniOpen(); return; }
   else if(k==='trick'){ trainModal(c); return; }
   else if(k==='acc'){ accModal(c); return; }
-  else if(k==='cafe'){ cafeOpen(); return; }
+  else if(k==='cafe'){ const first=!S.cafeOpened; S.cafeOpened=true; save(); go('cafe'); if(first) toast('☕ 下のタブに「カフェ」が追加された！ 出勤する子を選んで開店しよう'); return; }
   else if(k==='gocafe'){ go('cafe'); return; }
   else if(k==='hide'){ hideGame(); return; }
   else if(k==='rhythm'){ rhythmGame(); return; }
@@ -2132,7 +2132,7 @@ function cafeOpen(){
     staff.forEach(c=>{ const s=S.cats[c.id]; s.hp=clamp(s.hp-6,10,100); });
     log.push(`出勤した${staff.map(nm).join('・')}は少しつかれたみたい。（けんこう−6）`);
     S.money+=total; addStat('cafeYen',total); save(); render();
-    if(first) setTimeout(()=>toast('☕ 下のタブに「カフェ」が追加された！'),600);
+
     modal(`<div class="ptitle">☕ 本日の営業おしまい</div><p class="ptext" style="font-size:14px">${log.join('\n')}</p><p class="ptext" style="margin-top:8px">売り上げ <b style="color:var(--accent)">${total.toLocaleString()}円</b></p>`,[['とじる',null,'primary']]);
     homeMsg=`カフェの売り上げ ${total.toLocaleString()}円！`;
   };
@@ -2284,6 +2284,14 @@ function renderCafe(){
     <div class="staffList">${fams.map(c=>{ const st=S.cats[c.id], on=staff.includes(c)&&!st.sick;
       return `<button class="staff ${on?'on':''}" data-st="${c.id}" ${open?'disabled':''}><img src="${catImg(c)}" alt=""><span>${nm(c)}</span><small>${CAT_TAG[c.id].t}・けんこう${st.hp}${st.sick?'・体調不良':''}</small><b>${on?'出勤':st.sick?'療養中':'お休み'}</b></button>`; }).join('')}</div></div>`;
   $('#v-cafe').innerHTML=h;
+}
+function cafeConfirm(){
+  const staff=cafeStaff().filter(c=>!S.cats[c.id].sick);
+  if(!staff.length){ toast('出勤する子を選んでください（体調不良の子は出勤できません）'); const el=$('#v-cafe .staffList'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+  modal(`<div class="ptitle">☕ 開店の準備</div><div class="logoCats">${staff.map(c=>`<img src="${catImg(c)}" alt="">`).join('')}</div>
+    <p class="ptext">今日の出勤：${staff.map(c=>`${nm(c)}（${CAT_TAG[c.id].t}）`).join('、')}
+出勤した子は、けんこうが少し減ります。（時間1マス）</p>`,
+    [['このメンバーで開店',()=>cafeOpen(),'primary'],['メンバーを変える',()=>{ const el=$('#v-cafe .staffList'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }]]);
 }
 function cafeBubble(id,t){
   const el=document.querySelector(`#v-cafe .ccat[data-cc="${id}"]`); if(!el) return;
@@ -2445,7 +2453,7 @@ $('#v-note').addEventListener('click',e=>{ const tt=e.target.closest('[data-titl
   const a=e.target.closest('[data-alb]'); if(a){ albumView(+a.dataset.alb); return; }
   const c=e.target.closest('[data-cat]'); if(c) catDetail(c.dataset.cat); });
 $('#v-cafe').addEventListener('click',e=>{
-  const o=e.target.closest('[data-cf]'); if(o&&!o.disabled){ cafeOpen(); return; }
+  const o=e.target.closest('[data-cf]'); if(o&&!o.disabled){ cafeConfirm(); return; }
   const sb=e.target.closest('[data-st]'); if(sb&&!sb.disabled){ toggleStaff(sb.dataset.st); return; }
   const c=e.target.closest('[data-cc]'); if(c){ const id=c.dataset.cc, st=S.cats[id], tr=learned(st);
     const t=st.sick?'ミィ…':tr.length&&Math.random()<.5?tr[Math.floor(Math.random()*tr.length)]+'！':['いらっしゃいニャ','ニャー','♥','ゴロゴロ…'][Math.floor(Math.random()*4)];
