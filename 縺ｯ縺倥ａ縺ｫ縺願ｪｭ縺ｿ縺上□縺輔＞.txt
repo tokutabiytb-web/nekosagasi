@@ -1,0 +1,25 @@
+まちの保護ねこ　Netlify公開手順（ランキングつき）
+
+■ フォルダの中身
+・index.html …… ゲーム本体
+・netlify/functions/ranking.mjs …… ランキングを保存するプログラム
+・package.json / netlify.toml …… Netlifyの設定
+
+※ランキングのデータは Netlify Blobs（Netlify標準の保存機能）に保存されます。外部サービスの登録は不要です。
+※フォルダをブラウザにドラッグ＆ドロップする方法では、ランキング用のプログラムが動きません。下のどちらかの方法で公開してください。
+
+■ 方法A：Netlify CLI（パソコンから公開）
+1. Node.js をインストール（https://nodejs.org）
+2. ターミナルでこのフォルダに移動
+3. npm install -g netlify-cli
+4. netlify login
+5. netlify deploy --build --prod
+   （初回は「新しいサイトを作る」か「既存サイトにつなぐ」を選びます）
+
+■ 方法B：GitHub 連携
+1. このフォルダの中身を GitHub のリポジトリにアップロード
+2. Netlify の「Add new site」→「Import an existing project」でリポジトリを選ぶ
+3. ビルド設定は空欄のままで Deploy
+
+■ 確認
+公開したページでゲームを始め、「ランキング」タブを開いて自分の記録が表示されればOKです。
